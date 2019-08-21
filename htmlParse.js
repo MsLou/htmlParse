@@ -2,7 +2,7 @@
  * @Author: Luoxd
  * @Description: 
  * @Date: 2019-08-21 15:05:26
- * @LastEditTime: 2019-08-21 17:23:40
+ * @LastEditTime: 2019-08-21 17:53:48
  * @LastEditors: Luoxd
  */
 function parse (template) {
@@ -12,7 +12,8 @@ function parse (template) {
     }
     const tagReg = /^<[a-z]+(\s+[a-z]+(=\"[\w|\.|\:|\/]+\")?)*\s*\>/
     const startTagReg = /^\<[a-z]+/
-    const tagAllReg = /\<(\/)?[a-z]+((\s+[a-z]+(=\"[\w|\.|\:|\/]+\")?)*\s*\>)?/g
+    // const tagAllReg = /\<(\/)?[a-z]+((\s+[a-z]+(=\"[\w|\.|\:|\/]+\")?)*\s*\>)?/g
+    const tagAllReg = /(\<(\/)?[a-z]+((\s+[a-z]+(=\"[\w|\.|\:|\/]+\")?)*\s*\>)?)|([^<>]+)/g
     const endTagReg = /\<\/\w+\>/
     const nodeAll = template.match(tagAllReg)
     console.log(nodeAll, 'nodeAll')
@@ -44,20 +45,23 @@ function parse (template) {
         })
     }
     
-    // if (startTagAll.length) {
-    //     throw '模板解析错误'
-    // }
+    if (startTagAll.length) {
+        throw '模板解析错误'
+    }
 
     function parseTag (template) {
         const info = {
             tag: '',
             attr: null,
             isEnd: false,
+            text: '',
+            type: null,
             children: []
         }
         const startTag = template.match(tagReg)
         let attri = ''
         if (startTag) {
+            info.type = 1
             attri = startTag[0].replace(startTagReg, '')
             info.tag = startTag[0].match(startTagReg)[0].replace('<', '')
             if (attri) {
@@ -77,11 +81,14 @@ function parse (template) {
                     break;
             }
         } else {
-            throw '模板解析错误'
+            info.type = 2
+            info.tag = 'text'
+            info.text = template
+            info.isEnd = true
         }
         return info
     }
     return templateInfo
 }
 
-parse('<div id="bb" class="divClass"><p><img src="http://aaa.jpg"></p><ul><li></li></ul></div>')
+parse('<div id="bb" class="divClass"><p><img src="http://aaa.jpg"></p><ul><li>1212</li></ul></div>')
